@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Run Overview</h2>
+
+<div class="card">
+    <p><strong>Run ID:</strong> {{ run["run_id"] }}</p>
+    <p><strong>Status:</strong> {{ run["status"] }}</p>
+    <p><strong>Module:</strong> {{ run["module"] }}</p>
+    <p><strong>User:</strong> {{ run["user_id"] }}</p>
+    <p><strong>Tenant:</strong> {{ run["tenant_id"] }}</p>
+    <p><strong>Model:</strong> {{ run["model_name"] }}</p>
+    <p><strong>Temperature:</strong> {{ run["temperature"] }}</p>
+    <p><strong>Middleware Version:</strong> {{ run["middleware_version"] }}</p>
+    <p><strong>Policy Pack:</strong> {{ run["policy_pack_version"] }}</p>
+    <p><strong>State Version:</strong> {{ run["state_version"] }}</p>
+    <p><strong>Started:</strong> {{ run["started_at"] }}</p>
+    <p><strong>Ended:</strong> {{ run["ended_at"] }}</p>
+</div>
+
+<hr>
+
+<h3>Approval Timeline</h3>
+{% if approvals %}
+    {% for a in approvals %}
+    <div class="card">
+        <p><strong>Approved By:</strong> {{ a["approved_by"] }}</p>
+        <p><strong>Policy Level:</strong> {{ a["policy_level"] }}</p>
+        <p><strong>Approved At:</strong> {{ a["approved_at"] }}</p>
+        <p><strong>Expiry:</strong> {{ a["expiry"] }}</p>
+        <p><strong>Changes:</strong> {{ a["changes_summary"] }}</p>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>No approvals recorded.</p>
+{% endif %}
+
+<hr>
+
+<h3>Tool Execution Log</h3>
+{% if tools %}
+    {% for t in tools %}
+    <div class="card">
+        <p><strong>Tool:</strong> {{ t["tool_name"] }}</p>
+        <p><strong>Input Hash:</strong> {{ t["input_hash"] }}</p>
+        <p><strong>Result Hash:</strong> {{ t["result_hash"] }}</p>
+        <p><strong>Executed At:</strong> {{ t["executed_at"] }}</p>
+        <p><strong>Idempotency Key:</strong> {{ t["idempotency_key"] }}</p>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>No tool executions recorded.</p>
+{% endif %}
+
+<hr>
+
+<h3>Execution Trace</h3>
+{% if events %}
+    {% for e in events %}
+    <div class="card">
+        <p><strong>Node:</strong> {{ e["node_name"] }}</p>
+        <p><strong>Event Type:</strong> {{ e["event_type"] }}</p>
+        <p><strong>Summary:</strong> {{ e["summary"] }}</p>
+        <p><strong>Timestamp:</strong> {{ e["timestamp"] }}</p>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>No execution events recorded.</p>
+{% endif %}
+
+{% endblock %}

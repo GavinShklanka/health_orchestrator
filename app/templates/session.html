@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="session-wrapper">
+
+    <!-- SESSION HEADER -->
+    <div class="run-card">
+
+        <div class="session-header">
+            <h2>Appointment Session</h2>
+
+            <div id="status-pill">
+                <span class="status-pill status-{{ run['status']|lower }} {% if run['status'] == 'ESCALATED' %}pulse{% endif %}">
+                    {{ run['status'] }}
+                </span>
+            </div>
+
+            {% if events %}
+                <div class="policy-pill" style="margin-top:8px;">
+                    Audit Trail: {{ events|length }} events logged
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="meta-block">
+            <div><strong>Run ID:</strong> {{ run['run_id'] }}</div>
+            <div><strong>Module:</strong> {{ run['module'] }}</div>
+            <div class="timestamp">
+                Started: {{ run['started_at'] }}
+                {% if run['ended_at'] %}
+                    | Completed: {{ run['ended_at'] }}
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- EXECUTION TIMELINE -->
+    <div class="run-card" style="margin-top:24px;">
+
+        <h3>Execution Timeline</h3>
+
+        <div class="timeline">
+
+            <div class="timeline-step completed">
+                <div class="dot"></div>
+                <div class="content">
+                    <strong>Started</strong>
+                </div>
+            </div>
+
+            <div class="timeline-step {% if run['status'] in ['WAITING_APPROVAL','ESCALATED','COMPLETED'] %}completed{% endif %}">
+                <div class="dot"></div>
+                <div class="content">
+                    <strong>Approval Stage</strong>
+                </div>
+            </div>
+
+            <div class="timeline-step {% if run['status'] in ['RUNNING','COMPLETED'] %}active{% endif %}">
+                <div class="dot"></div>
+                <div class="content">
+                    <strong>Execution</strong>
+                </div>
+            </div>
+
+            <div class="timeline-step {% if run['status'] == 'COMPLETED' %}completed{% endif %}">
+                <div class="dot"></div>
+                <div class="content">
+                    <strong>Completed</strong>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- GOVERNANCE INSIGHTS -->
+    <div class="run-card" style="margin-top:24px;">
+
+        <h3>Governance Insights</h3>
+
+        <div class="insight-grid">
+
+            <div class="insight-card">
+                <strong>Risk Posture</strong>
+                <div style="margin-top:8px;">
+                    {{ run['status'] }}
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <strong>Audit Trail Density</strong>
+                <div style="margin-top:8px;">
+                    {{ events|length }} lifecycle events
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <strong>Execution Governance</strong>
+                <div style="margin-top:8px;">
+                    {% if run['status'] == 'WAITING_APPROVAL' %}
+                        Human Review Active
+                    {% elif run['status'] == 'ESCALATED' %}
+                        Escalated for Risk Mitigation
+                    {% elif run['status'] == 'COMPLETED' %}
+                        Controlled Completion
+                    {% else %}
+                        Automated Execution
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- SYSTEM RESPONSE -->
+    <div class="run-card" style="margin-top:24px;">
+
+        <h3>System Response</h3>
+
+        {% if run['status'] == "RUNNING" %}
+            <div class="processing-block">
+                <div class="spinner"></div>
+                <div>Processing your request…</div>
+            </div>
+
+        {% elif run['status'] == "WAITING_APPROVAL" %}
+            <div class="status-block waiting">
+                Awaiting human review.
+            </div>
+
+        {% elif run['status'] == "ESCALATED" %}
+            <div class="status-block escalated">
+                Escalated for further evaluation.
+            </div>
+
+        {% elif run['status'] == "FAILED" %}
+            <div class="status-block failed">
+                An unexpected error occurred.
+            </div>
+
+        {% elif run['status'] == "COMPLETED" %}
+            <div class="final-output fade-in">
+                {{ final_message or "Completed successfully." }}
+            </div>
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<!-- Status Pop Animation -->
+<script>
+    const pill = document.getElementById("status-pill");
+    if (pill) {
+        pill.classList.add("updated");
+    }
+</script>
+
+{% if auto_refresh %}
+<script>
+    setTimeout(() => window.location.reload(), 4000);
+</script>
+{% endif %}
+
+{% endblock %}

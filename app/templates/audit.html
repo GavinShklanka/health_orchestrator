@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-area">
+
+    <h2>Audit Log</h2>
+
+    <div class="run-card">
+        <h3>Filter</h3>
+
+        <form method="get" action="/audit">
+            <label for="run_id" style="display:block; margin-bottom:8px;">Run ID</label>
+            <select name="run_id" id="run_id" style="width:100%; padding:10px; border-radius:10px;">
+                <option value="" {% if not run_id %}selected{% endif %}>All runs</option>
+                {% for r in recent_runs %}
+                    <option value="{{ r['run_id'] }}" {% if run_id == r['run_id'] %}selected{% endif %}>
+                        {{ r['run_id'] }} ({{ r['status'] }} | {{ r['module'] }})
+                    </option>
+                {% endfor %}
+            </select>
+
+            <div style="margin-top:12px;">
+                <button class="approve-btn" type="submit">Apply</button>
+                <a class="summary-chip" href="/audit" style="margin-left:10px;">Reset</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="run-card">
+        <h3>Events{% if run_id %} (Filtered){% endif %}</h3>
+
+        {% if events %}
+            {% for e in events %}
+                <div style="margin-bottom:14px;">
+                    <div><strong>{{ e['node_name'] }}</strong>
+                        <span style="opacity:0.6;">({{ e['event_type'] }})</span>
+                    </div>
+                    <div style="font-size:12px; opacity:0.6;">
+                        {{ e['timestamp'] }} | Run: {{ e['run_id'] }}
+                    </div>
+                    <div style="margin-top:6px;">
+                        {{ e['summary'] }}
+                    </div>
+
+                    <div style="margin-top:10px;">
+                        <a href="/run/{{ e['run_id'] }}" class="summary-chip">Open Run Detail</a>
+                        <a href="/?selected={{ e['run_id'] }}" class="summary-chip">Open in Dashboard</a>
+                    </div>
+
+                    <hr>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">No audit events recorded.</div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

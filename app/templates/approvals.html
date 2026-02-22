@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-area">
+
+    <h2>Approvals</h2>
+
+    <!-- ===================================== -->
+    <!-- APPROVAL QUEUE -->
+    <!-- ===================================== -->
+    <div class="run-card">
+        <h3>Approval Queue</h3>
+
+        {% if pending_runs %}
+            {% for run in pending_runs %}
+                <div style="margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.08);">
+
+                    <div><strong>{{ run['run_id'][:8] }}...</strong></div>
+
+                    <div>
+                        Status:
+                        <span class="status-badge status-{{ run['status']|lower }}">
+                            {{ run['status'] }}
+                        </span>
+                    </div>
+
+                    <div>Module: {{ run['module'] }}</div>
+
+                    <div style="font-size:12px; opacity:0.6;">
+                        {{ run['started_at'] }}
+                    </div>
+
+                    <div style="margin-top:12px;">
+
+                        <form method="post" action="/approve/{{ run['run_id'] }}" style="display:inline;">
+                            <button type="submit" class="summary-chip">
+                                Approve
+                            </button>
+                        </form>
+
+                        <form method="post" action="/reject/{{ run['run_id'] }}" style="display:inline; margin-left:8px;">
+                            <button type="submit" class="summary-chip">
+                                Reject
+                            </button>
+                        </form>
+
+                        <a href="/session/{{ run['run_id'] }}"
+                           class="summary-chip"
+                           style="margin-left:8px;">
+                            Open Session
+                        </a>
+
+                    </div>
+
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">No pending approvals.</div>
+        {% endif %}
+    </div>
+
+    <!-- ===================================== -->
+    <!-- FULL APPROVAL HISTORY -->
+    <!-- ===================================== -->
+    <div class="run-card" style="margin-top:30px;">
+        <h3>Full Approval History</h3>
+
+        {% if approvals %}
+            {% for a in approvals %}
+                <div style="margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.08);">
+
+                    <div><strong>Run:</strong> {{ a['run_id'][:8] }}...</div>
+
+                    <div>Module: {{ a['module'] or '—' }}</div>
+
+                    <div>
+                        Run Status:
+                        <span class="status-badge status-{{ (a['run_status'] or 'unknown')|lower }}">
+                            {{ a['run_status'] or 'UNKNOWN' }}
+                        </span>
+                    </div>
+
+                    <div style="margin-top:8px;">
+                        <strong>{{ a['approved_by'] }}</strong>
+                        <span class="policy-pill">{{ a['policy_level'] }}</span>
+                    </div>
+
+                    <div style="font-size:12px; opacity:0.6;">
+                        Approved at: {{ a['approved_at'] }}
+                        {% if a['expiry'] %}
+                            | Expiry: {{ a['expiry'] }}
+                        {% endif %}
+                    </div>
+
+                    {% if a['changes_summary'] %}
+                        <div style="margin-top:6px;">
+                            {{ a['changes_summary'] }}
+                        </div>
+                    {% else %}
+                        <div style="margin-top:6px; opacity:0.6;">
+                            No changes summary.
+                        </div>
+                    {% endif %}
+
+                    <div style="margin-top:10px;">
+                        <a href="/session/{{ a['run_id'] }}" class="summary-chip">
+                            Open Session
+                        </a>
+                    </div>
+
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">No approvals recorded.</div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

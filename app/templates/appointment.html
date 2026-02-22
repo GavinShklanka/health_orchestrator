@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Create Appointment Run</h2>
+
+<form method="post" action="/appointment">
+
+    <label>Module:</label><br>
+    <input type="text" name="module" required><br><br>
+
+    <label>User ID:</label><br>
+    <input type="text" name="user_id" required><br><br>
+
+    <label>Tenant ID:</label><br>
+    <input type="text" name="tenant_id" required><br><br>
+
+    <label>Patient Message:</label><br>
+    <textarea name="message"
+              rows="4"
+              style="width:100%;"
+              placeholder="Describe your request..."
+              required></textarea><br><br>
+
+    <button type="submit">Create Run</button>
+
+</form>
+
+<!-- Example Scenario Box -->
+<div class="run-card" style="margin-top:20px;">
+    <h4>Example Test Scenarios</h4>
+    <ul style="font-size:14px; opacity:0.85;">
+        <li><strong>Normal:</strong> Reschedule my dental cleaning.</li>
+        <li><strong>Moderate Risk:</strong> Cancel my surgery next week.</li>
+        <li><strong>Emergency:</strong> I have chest pain and need help immediately.</li>
+        <li><strong>Restricted Tenant:</strong> Use tenant_id = restricted_tenant</li>
+    </ul>
+</div>
+
+{% endblock %}

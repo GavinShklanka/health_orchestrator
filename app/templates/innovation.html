@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-area">
+
+    <h2>Innovation Sandbox</h2>
+
+    <div class="run-card">
+        <h3>Draft / Sandbox Runs</h3>
+
+        {% if drafts %}
+            {% for d in drafts %}
+                <div style="margin-bottom:14px;">
+                    <div><strong>{{ d['run_id'] }}</strong></div>
+                    <div>Status:
+                        <span class="status-badge status-{{ d['status']|lower }}">
+                            {{ d['status'] }}
+                        </span>
+                    </div>
+                    <div>Module: {{ d['module'] }}</div>
+
+                    <div style="font-size:12px; opacity:0.6;">
+                        Started: {{ d['started_at'] }}
+                        {% if d['ended_at'] %} | Ended: {{ d['ended_at'] }}{% endif %}
+                    </div>
+
+                    <div style="margin-top:10px; font-size:12px; opacity:0.8;">
+                        Middleware Version: {{ d['middleware_version'] or "—" }}<br>
+                        Policy Pack: {{ d['policy_pack_version'] or "—" }}<br>
+                        State Version: {{ d['state_version'] or "—" }}<br>
+                        Model: {{ d['model_name'] or "—" }} | Temp: {{ d['temperature'] or "—" }}
+                    </div>
+
+                    <div style="margin-top:10px;">
+                        <a href="/run/{{ d['run_id'] }}" class="summary-chip">Open Run Detail</a>
+                        <a href="/?selected={{ d['run_id'] }}" class="summary-chip">Open in Dashboard</a>
+                    </div>
+
+                    <hr>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                No innovation runs found yet.<br>
+                (Anything with module containing INNOV or DRAFT will appear here.)
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="run-card">
+        <h3>Recent Runs (Context)</h3>
+
+        {% if recent %}
+            {% for r in recent %}
+                <div style="margin-bottom:10px;">
+                    <strong>{{ r['run_id'][:8] }}...</strong>
+                    <span style="opacity:0.7;">{{ r['status'] }} | {{ r['module'] }}</span>
+                    <div style="font-size:12px; opacity:0.6;">{{ r['started_at'] }}</div>
+                </div>
+                <hr>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">No recent runs.</div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

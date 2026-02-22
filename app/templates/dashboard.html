@@ -1,0 +1,427 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-area">
+
+    <h2>System Overview</h2>
+
+    <!-- ============================= -->
+    <!-- GOVERNANCE OVERVIEW (NEW) -->
+    <!-- ============================= -->
+    <div class="run-card">
+        <h3>Governance Overview</h3>
+
+        <div>Automation Rate: {{ automation_rate }}%</div>
+        <div>Human Intervention Rate: {{ human_intervention_rate }}%</div>
+        <div>Escalation Frequency: {{ escalation_frequency }}%</div>
+        <div>Control Completion Ratio: {{ control_completion_ratio }}%</div>
+        <div>Avg Oversight Latency: {{ avg_approval_latency }} sec</div>
+
+        <!-- Risk Gauge -->
+        <div style="margin-top:15px;">
+            <strong>Risk Exposure</strong>
+
+            <div class="gauge-bar">
+                <div class="gauge-fill"
+     style="--risk-width: {{ risk_exposure }}%;">
+</div>
+            </div>
+
+            <div style="font-size:12px; opacity:0.6; margin-top:6px;">
+                {{ risk_exposure }}% governance load
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- EXECUTIVE OVERVIEW (ORIGINAL) -->
+    <!-- ============================= -->
+    <div class="run-card">
+        <h3>Executive Overview</h3>
+        <div>Total Runs: {{ total_runs }}</div>
+        <div>Escalation Rate: {{ escalation_rate }}%</div>
+        <div>Avg Completion Time: {{ avg_completion_time }} sec</div>
+        <div>Avg Approval Latency: {{ avg_approval_latency }} sec</div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- MIDDLEWARE HEATMAP (ORIGINAL) -->
+    <!-- ============================= -->
+   <div class="run-card">
+    <h3>Middleware Activity</h3>
+
+    {% if middleware_counts %}
+        {% for m in middleware_counts %}
+            <div class="middleware-row">
+                <div class="middleware-label">
+                    {{ m.node_name }} — {{ m.count }} executions
+                </div>
+
+                <div class="middleware-bar">
+                     <div class="middleware-fill"
+                    data-intensity="{{ m.intensity }}">
+                </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">No middleware activity recorded.</div>
+    {% endif %}
+</div>
+
+
+
+    <!-- ============================= -->
+    <!-- FILTER ROW (UNCHANGED) -->
+    <!-- ============================= -->
+    <div class="summary-row">
+        <a class="summary-chip {% if not active_filter %}active{% endif %}" href="/">All</a>
+
+        <a class="summary-chip {% if active_filter == 'SUCCESS' %}active{% endif %}"
+           href="/?status=SUCCESS">
+            Success ({{ counts.get('SUCCESS', 0) }})
+        </a>
+
+        <a class="summary-chip {% if active_filter == 'ESCALATED' %}active{% endif %}"
+           href="/?status=ESCALATED">
+            Escalated ({{ counts.get('ESCALATED', 0) }})
+        </a>
+
+        <a class="summary-chip {% if active_filter == 'NEED_INFO' %}active{% endif %}"
+           href="/?status=NEED_INFO">
+            Need Info ({{ counts.get('NEED_INFO', 0) }})
+        </a>
+
+        <a class="summary-chip {% if active_filter == 'RUNNING' %}active{% endif %}"
+           href="/?status=RUNNING">
+            Running ({{ counts.get('RUNNING', 0) }})
+        </a>
+    </div>
+<<!-- ========================================== -->
+<!-- OPERATIONAL PIPELINE (Governance View) -->
+<!-- ========================================== -->
+
+<div class="run-card" style="margin-top:30px;">
+    <h3>Operational Pipeline</h3>
+
+    <div class="pipeline-grid">
+
+        <!-- ================= ACTIVE WORKFLOWS ================= -->
+        <div class="pipeline-column">
+            <h4>Active Workflows ({{ active_runs|length }})</h4>
+
+            {% if active_runs %}
+                {% for run in active_runs %}
+                    <a href="/session/{{ run['run_id'] }}"
+                       class="pipeline-card">
+
+                        <div class="pipeline-id">
+                            {{ run['run_id'][:8] }}...
+                        </div>
+
+                        <div class="pipeline-module">
+                            {{ run['module'] }}
+                        </div>
+
+                        <div class="status-badge status-running">
+                            RUNNING
+                        </div>
+
+                        <div class="pipeline-time">
+                            {{ run['started_at'] }}
+                        </div>
+
+                    </a>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">No active workflows.</div>
+            {% endif %}
+        </div>
+
+        <!-- ================= PENDING REVIEW ================= -->
+        <div class="pipeline-column">
+            <h4>Pending Human Review ({{ pending_runs|length }})</h4>
+
+            {% if pending_runs %}
+                {% for run in pending_runs %}
+                    <a href="/session/{{ run['run_id'] }}"
+                       class="pipeline-card">
+
+                        <div class="pipeline-id">
+                            {{ run['run_id'][:8] }}...
+                        </div>
+
+                        <div class="pipeline-module">
+                            {{ run['module'] }}
+                        </div>
+
+                        <div class="status-badge status-waiting_approval">
+                            WAITING
+                        </div>
+
+                        <div class="pipeline-time">
+                            {{ run['started_at'] }}
+                        </div>
+
+                    </a>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">No pending approvals.</div>
+            {% endif %}
+        </div>
+
+        <!-- ================= ESCALATED RISK ================= -->
+        <div class="pipeline-column">
+            <h4>Escalated Risk ({{ escalated_runs|length }})</h4>
+
+            {% if escalated_runs %}
+                {% for run in escalated_runs %}
+                    <a href="/session/{{ run['run_id'] }}"
+                       class="pipeline-card escalated">
+
+                        <div class="pipeline-id">
+                            {{ run['run_id'][:8] }}...
+                        </div>
+
+                        <div class="pipeline-module">
+                            {{ run['module'] }}
+                        </div>
+
+                        <div class="status-badge status-escalated">
+                            ESCALATED
+                        </div>
+
+                        <div class="pipeline-time">
+                            {{ run['started_at'] }}
+                        </div>
+
+                    </a>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">No escalations.</div>
+            {% endif %}
+        </div>
+
+        <!-- ================= RECENTLY CLOSED ================= -->
+        <div class="pipeline-column">
+            <h4>Recently Closed ({{ closed_runs|length }})</h4>
+
+            {% if closed_runs %}
+                {% for run in closed_runs %}
+                    <a href="/session/{{ run['run_id'] }}"
+                       class="pipeline-card">
+
+                        <div class="pipeline-id">
+                            {{ run['run_id'][:8] }}...
+                        </div>
+
+                        <div class="pipeline-module">
+                            {{ run['module'] }}
+                        </div>
+
+                        <div class="status-badge status-completed">
+                            COMPLETED
+                        </div>
+
+                        <div class="pipeline-time">
+                            {{ run['started_at'] }}
+                        </div>
+
+                    </a>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">No completed workflows.</div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+<!-- ============================= -->
+<!-- FULL DATASET TOGGLE -->
+<!-- ============================= -->
+
+<div class="dataset-toggle-wrapper">
+
+    <button class="dataset-toggle-btn" onclick="toggleDataset()">
+        View Full Dataset ▾
+    </button>
+
+    <div id="dataset-container" class="dataset-collapsed">
+    <!-- ============================= -->
+    <!-- ORIGINAL SPLIT PANE (UNCHANGED) -->
+    <!-- ============================= -->
+    <div class="split-pane">
+
+        <!-- LEFT PANE -->
+        <div class="inbox-pane">
+            {% for run in runs %}
+                <a href="/?status={{ active_filter }}&selected={{ run['run_id'] }}"
+                   class="inbox-item {% if selected_run and selected_run['run_id'] == run['run_id'] %}selected{% endif %}">
+
+                    <div><strong>{{ run['run_id'][:8] }}...</strong></div>
+
+                    <div>
+                        Status:
+                        <span class="status-badge status-{{ run['status']|lower }}">
+                            {{ run['status'] }}
+                        </span>
+                    </div>
+
+                    {% if run['status'] == 'WAITING_APPROVAL' %}
+                        <div>Approval Required</div>
+                    {% endif %}
+
+                    <div>Module: {{ run['module'] }}</div>
+
+                    <div style="font-size:12px; opacity:0.6;">
+                        {{ run['started_at'] }}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+  </div>
+</div>
+        <!-- RIGHT PANE -->
+        <div class="detail-pane">
+
+            {% if selected_run %}
+
+                {% if selected_run['status'] == 'ESCALATED' %}
+                    <div class="run-card">
+                        <strong>Escalated Run – Immediate Review Required</strong>
+                    </div>
+                {% endif %}
+
+                <div class="run-card">
+                    <h3>Run Summary</h3>
+                    <div><strong>Run ID:</strong> {{ selected_run['run_id'] }}</div>
+                    <div><strong>Status:</strong> {{ selected_run['status'] }}</div>
+                    <div><strong>Module:</strong> {{ selected_run['module'] }}</div>
+                    <div><strong>Started:</strong> {{ selected_run['started_at'] }}</div>
+                    <div><strong>Ended:</strong> {{ selected_run['ended_at'] or "In Progress" }}</div>
+                </div>
+
+                <!-- APPROVALS -->
+                <div class="run-card">
+                    <h3>Approvals</h3>
+                    {% if approvals %}
+                        {% for a in approvals %}
+                            <div>
+                                <strong>{{ a['approved_by'] }}</strong>
+                                <span class="policy-pill">{{ a['policy_level'] }}</span>
+                                <div style="font-size:12px; opacity:0.6;">
+                                    {{ a['approved_at'] }}
+                                </div>
+                                <div>{{ a['changes_summary'] }}</div>
+                            </div>
+                            <hr>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">No approvals recorded.</div>
+                    {% endif %}
+                </div>
+
+                <!-- TOOL EXECUTION -->
+                <div class="run-card">
+                    <h3>Tool Execution</h3>
+                    {% if tools %}
+                        {% for t in tools %}
+                            <div>
+                                <strong>{{ t['tool_name'] }}</strong>
+                                <div style="font-size:12px; opacity:0.6;">
+                                    {{ t['executed_at'] }}
+                                </div>
+                                <div style="font-size:11px; opacity:0.5;">
+                                    Idempotency: {{ t['idempotency_key'] }}
+                                </div>
+                            </div>
+                            <hr>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">No tool executions recorded.</div>
+                    {% endif %}
+                </div>
+
+                <!-- EXECUTION TRACE -->
+                <div class="run-card">
+                    <h3>Execution Trace</h3>
+                    {% if events %}
+                        {% for e in events %}
+                            <div>
+                                <strong>{{ e['node_name'] }}</strong>
+                                <span style="opacity:0.6;">({{ e['event_type'] }})</span>
+                                <div style="font-size:12px; opacity:0.6;">
+                                    {{ e['timestamp'] }}
+                                </div>
+                                <div>{{ e['summary'] }}</div>
+                            </div>
+                            <hr>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">No execution events recorded.</div>
+                    {% endif %}
+                </div>
+
+                <!-- RISK POSTURE -->
+                <div class="run-card">
+                    <h3>Risk Posture</h3>
+
+                    {% if selected_run['status'] == 'ESCALATED' %}
+                        <div>High Risk – Escalated by Policy Layer</div>
+                    {% elif selected_run['status'] == 'NEED_INFO' %}
+                        <div>Moderate Risk – Additional Input Required</div>
+                    {% elif selected_run['status'] == 'RUNNING' %}
+                        <div>Active Execution – Monitoring</div>
+                    {% else %}
+                        <div>No Active Risk Signals</div>
+                    {% endif %}
+                </div>
+
+            {% else %}
+                <div class="empty-state">
+                    Select a run to preview governance details.
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleDataset() {
+    const container = document.getElementById("dataset-container");
+    const button = document.querySelector(".dataset-toggle-btn");
+
+    if (container.classList.contains("dataset-collapsed")) {
+        container.classList.remove("dataset-collapsed");
+        container.classList.add("dataset-expanded");
+        button.innerHTML = "Hide Full Dataset ▴";
+    } else {
+        container.classList.remove("dataset-expanded");
+        container.classList.add("dataset-collapsed");
+        button.innerHTML = "View Full Dataset ▾";
+    }
+}
+</script>
+
+{% endblock %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const bars = document.querySelectorAll(".middleware-fill");
+
+    bars.forEach(bar => {
+        const intensity = bar.getAttribute("data-intensity");
+
+        // Force layout before expanding
+        bar.style.width = "0%";
+
+        setTimeout(() => {
+            bar.style.width = intensity + "%";
+        }, 120);
+    });
+});
+</script>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agentic Appointment Engine</title>
+
+    <!-- Correct Static Link -->
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- Left Rail -->
+    <aside class="sidebar">
+        <div class="logo">AAE</div>
+        <nav class="nav-links">
+            <a href="/" class="{% if request.url.path == '/' %}active{% endif %}">Dashboard</a>
+            <a href="/appointment" class="{% if '/appointment' in request.url.path %}active{% endif %}">Appointment</a>
+            <a href="/innovation" class="{% if '/innovation' in request.url.path %}active{% endif %}">Innovation</a>
+            <a href="/approvals" class="{% if '/approvals' in request.url.path %}active{% endif %}">Approvals</a>
+            <a href="/audit" class="{% if '/audit' in request.url.path %}active{% endif %}">Audit</a>
+            </nav>
+    </aside>
+
+    <!-- Main Workspace -->
+    <div class="workspace">
+
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="workspace-title">Agentic Appointment Engine</div>
+            <div class="user-info">Admin</div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="page-content">
+            {% block content %}{% endblock %}
+        </main>
+
+    </div>
+
+</div>
+
+</body>
+</html>
